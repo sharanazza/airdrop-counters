@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Airdrop Counters</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8fafc;
+        }
+        .filter-btn {
+            padding: 0.5rem 1rem;
+            border-radius: 9999px;
+            border: 1px solid #e2e8f0;
+            background-color: white;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+        }
+        .filter-btn:hover {
+            background-color: #f1f5f9;
+        }
+        .filter-btn.active {
+            background-color: #3b82f6;
+            color: white;
+            border-color: #3b82f6;
+        }
+        .counter-badge {
+            margin-left: 0.5rem;
+            padding: 0.15rem 0.5rem;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+        .counter-all {
+            background-color: #e0f2fe;
+            color: #0369a1;
+        }
+        .counter-new {
+            background-color: #dbeafe;
+            color: #1e40af;
+        }
+        .counter-active {
+            background-color: #dcfce7;
+            color: #166534;
+        }
+        .counter-completed {
+            background-color: #f3e8ff;
+            color: #5b21b6;
+        }
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.25rem;
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+        .status-new {
+            background-color: #dbeafe;
+            color: #1e40af;
+        }
+        .status-active {
+            background-color: #dcfce7;
+            color: #166534;
+        }
+        .status-completed {
+            background-color: #f3e8ff;
+            color: #5b21b6;
+        }
+        .progress-bar {
+            height: 0.5rem;
+            border-radius: 0.25rem;
+            background-color: #e2e8f0;
+            overflow: hidden;
+        }
+        .progress-bar-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #3b82f6, #8b5cf6);
+        }
+        .link-arrow {
+            transition: transform 0.2s;
+        }
+        a:hover .link-arrow {
+            transform: translateX(2px);
+        }
+    </style>
+</head>
+<body class="min-h-screen py-12">
+    <div class="max-w-6xl mx-auto px-4">
+        <div class="text-center mb-10">
+            <h1 class="text-3xl font-bold text-gray-900 mb-2">🚀 Airdrop Tracker</h1>
+            <p class="text-lg text-gray-600">Live tracking of cryptocurrency airdrops </p>
+        </div>
+
+        <!-- Filter Controls with Live Counters -->
+        <div class="flex flex-wrap justify-center gap-3 mb-8">
+            <button class="filter-btn active" data-status="all">
+                <i class="fas fa-layer-group mr-1"></i> All
+                <span id="counter-all" class="counter-badge counter-all">7</span>
+            </button>
+            <button class="filter-btn" data-status="new">
+                <i class="fas fa-star mr-1"></i> New
+                <span id="counter-new" class="counter-badge counter-new">2</span>
+            </button>
+            <button class="filter-btn" data-status="active">
+                <i class="fas fa-spinner mr-1"></i> Active
+                <span id="counter-active" class="counter-badge counter-active">3</span>
+            </button>
+            <button class="filter-btn" data-status="completed">
+                <i class="fas fa-check-circle mr-1"></i> Completed
+                <span id="counter-completed" class="counter-badge counter-completed">2</span>
+            </button>
+        </div>
+
+        <!-- Airdrop Table -->
+        <div class="bg-white rounded-xl shadow-sm overflow-hidden border border-gray-200">
+            <div class="overflow-x-auto">
+                <table class="w-full">
+                    <thead>
+                        <tr class="text-left text-gray-500 text-sm font-medium border-b border-gray-200">
+                            <th class="px-6 py-4">Project</th>
+                            <th class="px-6 py-4">Token</th>
+                            <th class="px-6 py-4">Status</th>
+                            <th class="px-6 py-4">Estimated Value</th>
+                            <th class="px-6 py-4">Deadline</th>
+                            <th class="px-6 py-4 text-right">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="airdrop-data" class="divide-y divide-gray-200">
+                        <!-- Data will be populated by JavaScript -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Airdrop Data
+        const airdropData = [
+            {
+                id: 1,
+                name: "Arbitrum Odyssey",
+                token: "ARB",
+                network: "Arbitrum",
+                status: "completed",
+                value: "$1,000 - $5,000",
+                deadline: "1 April 2023",
+                progress: 100,
+                link: "https://arbitrum.foundation/"
+            },
+            {
+                id: 2,
+                name: "Optimism Airdrop",
+                token: "OP",
+                network: "Optimism",
+                status: "completed",
+                value: "$500 - $2,500",
+                deadline: "1 June 2023",
+                progress: 100,
+                link: "https://app.optimism.io/governance"
+            },
+            {
+                id: 3,
+                name: "zkSync Era",
+                token: "ZKS",
+                network: "zkSync Era",
+                status: "active",
+                value: "$300 - $1,800",
+                deadline: "15 July 2023",
+                progress: 65,
+                link: "https://zksync.io/"
+            },
+            {
+                id: 4,
+                name: "StarkNet",
+                token: "STRK",
+                network: "StarkNet",
+                status: "active",
+                value: "$200 - $1,200",
+                deadline: "30 July 2023",
+                progress: 35,
+                link: "https://starknet.io/"
+            },
+            {
+                id: 5,
+                name: "LayerZero",
+                token: "LZ",
+                network: "Multi-chain",
+                status: "active",
+                value: "$400 - $3,000",
+                deadline: "15 August 2023",
+                progress: 15,
+                link: "https://layerzero.network/"
+            },
+            {
+                id: 6,
+                name: "Scroll Network",
+                token: "SCRL",
+                network: "Ethereum L2",
+                status: "new",
+                value: "$150 - $1,000",
+                deadline: "1 September 2023",
+                progress: 0,
+                link: "https://scroll.io/"
+            },
+            {
+                id: 7,
+                name: "Base Network",
+                token: "BASE",
+                network: "Coinbase L2",
+                status: "new",
+                value: "$500 - $2,500",
+                deadline: "1 October 2023",
+                progress: 0,
+                link: "https://base.org/"
+            }
+        ];
+
+        // DOM Elements
+        const tableBody = document.getElementById('airdrop-data');
+        const filterButtons = document.querySelectorAll('.filter-btn');
+        const counters = {
+            all: document.getElementById('counter-all'),
+            new: document.getElementById('counter-new'),
+            active: document.getElementById('counter-active'),
+            completed: document.getElementById('counter-completed')
+        };
+
+        // Render table function
+        function renderTable(data) {
+            tableBody.innerHTML = '';
+            
+            data.forEach(item => {
+                const row = document.createElement('tr');
+                row.className = 'hover:bg-gray-50 transition';
+                row.setAttribute('data-status', item.status);
+                
+                let statusBadge, progressBar = '';
+                
+                if (item.status === 'new') {
+                    statusBadge = `<span class="status-badge status-new"><i class="fas fa-star"></i> New</span>`;
+                } else if (item.status === 'active') {
+                    statusBadge = `<span class="status-badge status-active"><i class="fas fa-spinner"></i> Active</span>`;
+                    progressBar = `<div class="progress-bar mt-2"><div class="progress-bar-fill" style="width: ${item.progress}%"></div></div>`;
+                } else {
+                    statusBadge = `<span class="status-badge status-completed"><i class="fas fa-check-circle"></i> Completed</span>`;
+                }
+                
+                row.innerHTML = `
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <div class="flex items-center">
+                            <div class="flex-shrink-0 h-10 w-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-600">
+                                <i class="fas fa-coins"></i>
+                            </div>
+                            <div class="ml-4">
+                                <a href="${item.link}" target="_blank" class="font-medium text-gray-900 hover:text-blue-600 hover:underline inline-flex items-center">
+                                    ${item.name}
+                                    <i class="fas fa-external-link-alt link-arrow text-xs ml-1 text-gray-400"></i>
+                                </a>
+                                <div class="text-sm text-gray-500">${item.network}</div>
+                            </div>
+                        </div>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-gray-900 font-medium">
+                        ${item.token}
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        ${statusBadge}
+                        ${progressBar}
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-gray-500">
+                        ${item.value}
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-gray-500">
+                        ${item.deadline}
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                        ${
+                            item.status === 'completed' 
+                            ? '<button class="text-gray-500 cursor-not-allowed" disabled>Completed</button>'
+                            : `<a href="${item.link}" target="_blank" class="text-blue-600 hover:text-blue-800">
+                                Join <i class="fas fa-chevron-right link-arrow text-xs ml-1"></i>
+                            </a>`
+                        }
+                    </td>
+                `;
+                
+                tableBody.appendChild(row);
+            });
+            
+            // Update counters
+            updateCounters(data);
+        }
+
+        // Update counters based on visible data
+        function updateCounters(visibleData) {
+            const newCount = visibleData.filter(item => item.status === 'new').length;
+            const activeCount = visibleData.filter(item => item.status === 'active').length;
+            const completedCount = visibleData.filter(item => item.status === 'completed').length;
+            
+            counters.new.textContent = newCount;
+            counters.active.textContent = activeCount;
+            counters.completed.textContent = completedCount;
+            counters.all.textContent = visibleData.length;
+        }
+
+        // Filter function
+        function filterTable(activeFilters) {
+            if (activeFilters.includes('all') || activeFilters.length === 0) {
+                return airdropData;
+            }
+            return airdropData.filter(item => activeFilters.includes(item.status));
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            // Initial render
+            renderTable(airdropData);
+            
+            // Set up filter buttons
+            filterButtons.forEach(button => {
+                button.addEventListener('click', () => {
+                    const status = button.getAttribute('data-status');
+                    
+                    if (status === 'all') {
+                        filterButtons.forEach(btn => btn.classList.remove('active'));
+                        button.classList.add('active');
+                    } else {
+                        button.classList.toggle('active');
+                        
+                        const activeFilters = document.querySelectorAll('.filter-btn:not([data-status="all"]).active');
+                        const allButton = document.querySelector('.filter-btn[data-status="all"]');
+                        
+                        if (activeFilters.length === 0) {
+                            allButton.classList.add('active');
+                        } else {
+                            allButton.classList.remove('active');
+                        }
+                    }
+                    
+                    // Get active filters
+                    const activeFilters = Array.from(document.querySelectorAll('.filter-btn:not([data-status="all"]).active'))
+                        .map(btn => btn.getAttribute('data-status'));
+                    
+                    // Filter the table
+                    const filteredData = activeFilters.length === 0 || document.querySelector('.filter-btn[data-status="all"]').classList.contains('active')
+                        ? airdropData
+                        : filterTable(activeFilters);
+                    
+                    // Re-render table with updated counters
+                    renderTable(filteredData);
+                });
+            });
+        });
+    </script>
+</body>
+</html>
